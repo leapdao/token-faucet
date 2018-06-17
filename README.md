@@ -1,7 +1,7 @@
 # Parsec Testnet Faucet
 
-Reload Duration: *24h / address*
-Amount Dispensed: *10 PSC*
+Reload Duration: **24h / address**  
+Amount Dispensed: **10 PSC**  
 
 Instructions:
 
