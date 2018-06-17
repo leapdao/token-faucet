@@ -1,0 +1,10 @@
+.env
+deploy.env
+event.json
+event-setup.json
+context.json
+node_modules
+dist
+Archive.zip
+artifact.zip
+npm-debug.log
