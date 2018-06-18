@@ -16,3 +16,7 @@ curl -X POST
   }'
 https://sarrsmlpsg.execute-api.eu-west-1.amazonaws.com/v0/tweetFund
 ```
+
+## LICENSE
+
+Project source files are made available under the terms of the GNU Affero General Public License (GNU AGPLv3). See individual files for details.

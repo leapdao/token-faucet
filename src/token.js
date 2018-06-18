@@ -1,3 +1,12 @@
+
+/**
+ * Copyright (c) 2018-present, Parsec Labs (parseclabs.org)
+ *
+ * This source code is licensed under the GNU Affero General Public License,
+ * version 3, found in the LICENSE file in the root directory of this source 
+ * tree.
+ */
+
 import Contract from './contract';
 
 export const TOKEN_ABI = [{ constant: true, inputs: [{ name: '_owner', type: 'address' }], name: 'balanceOf', outputs: [{ name: '', type: 'uint256' }], payable: false, stateMutability: 'view', type: 'function' }, { constant: false, inputs: [{ name: '_to', type: 'address' }, { name: '_amountBabz', type: 'uint256' }], name: 'transfer', outputs: [{ name: '', type: 'bool' }], payable: false, stateMutability: 'nonpayable', type: 'function' }];
