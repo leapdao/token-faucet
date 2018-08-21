@@ -3,10 +3,10 @@
  * Copyright (c) 2018-present, Parsec Labs (parseclabs.org)
  *
  * This source code is licensed under the GNU Affero General Public License,
- * version 3, found in the LICENSE file in the root directory of this source 
+ * version 3, found in the LICENSE file in the root directory of this source
  * tree.
  */
- 
+
 export default class Contract {
 
   constructor(web3, senderAddr, sqs, queueUrl) {
@@ -48,7 +48,7 @@ export default class Contract {
     return new Promise((resolve, reject) => {
       contractMethod.estimateGas(...args, { from: this.senderAddr }, (gasErr, gas) => {
         if (gasErr) {
-          reject(`Error: Estimate error: ${JSON.stringify(gasErr)}`);
+          reject(`Error: Estimate error: ${JSON.stringify(gasErr.message)}`);
         } else if (gas > maxGas) {
           reject(`Error: Too much gas required for tx (${gas})`);
         } else {
