@@ -5,7 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-export default class Contract {
+module.exports = class Contract {
 
   constructor(web3, senderAddr, sqs, queueUrl) {
     this.web3 = web3;

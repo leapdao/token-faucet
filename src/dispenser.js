@@ -28,7 +28,7 @@ function getTweet(client, id) {
   });
 }
 
-module.exports = class TweetConsumer {
+module.exports = class FaucetService {
 
   constructor(token, twitter, db, web3) {
     this.token = token;

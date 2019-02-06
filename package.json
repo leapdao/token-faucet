@@ -4,14 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint --fix .",
-    "build": "yarn build:init && yarn build:js && yarn build:install",
-    "build:init": "rm -rf dist && mkdir dist",
-    "build:js": "sucrase . -t imports -d dist --exclude-dirs dist",
-    "build:install": "cp package.json dist/ && cd dist && npm install --production",
-    "package": "yarn build && yarn package:pack",
-    "package:pack": "cd dist && zip -r ../lambda.zip * && cd ..",
-    "test": "mocha -r sucrase/register *.test.js"
+    "lint": "eslint --fix *.js src/*.js",
+    "test": "mocha *.test.js",
+    "start": "serverless offline start -s dev"
   },
   "repository": {
     "type": "git",
@@ -22,14 +17,13 @@
   "devDependencies": {
     "chai": "latest",
     "eslint": "^5.13.0",
-    "eslint-plugin-import": "^2.16.0",
     "mocha": "^2.5.3",
+    "serverless-offline": "^4.2.1",
     "sinon": "^1.17.4",
-    "sinon-chai": "^2.8.0",
-    "sucrase": "^3.9.5"
+    "sinon-chai": "^2.8.0"
   },
   "dependencies": {
     "twitter": "^1.7.1",
-    "web3": "^0.18.2"
+    "web3": "^0.19.0"
   }
 }

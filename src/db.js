@@ -37,7 +37,7 @@ const transform = (data) => {
   return attributes;
 };
 
-export default class Db {
+module.exports = class Db {
 
   constructor(sdb, tableName) {
     this.sdb = sdb;

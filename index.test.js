@@ -1,11 +1,12 @@
-import chai, { expect } from 'chai';
-import sinonChai from 'sinon-chai';
-import sinon from 'sinon';
-import { it, describe, afterEach } from 'mocha';
+const chai = require('chai');
+const { expect } = chai;
+const sinonChai = require('sinon-chai');
+const sinon = require('sinon');
+const { it, describe, afterEach } = require('mocha');
 
-import Token from './src/token';
-import FaucetSerivce from './src/index';
-import Db from './src/db';
+const Token = require('./src/token');
+const FaucetSerivce = require('./src');
+const Db = require('./src/db');
 
 chai.use(sinonChai);
 

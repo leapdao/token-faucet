@@ -28,4 +28,4 @@ class EnhanceYourCalm extends ExtendableError {}
 
 class Teapot extends ExtendableError {}
 
-export { Unauthorized, NotFound, BadRequest, Forbidden, Conflict, EnhanceYourCalm, Teapot };
+module.exports = { Unauthorized, NotFound, BadRequest, Forbidden, Conflict, EnhanceYourCalm, Teapot };

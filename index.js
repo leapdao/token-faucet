@@ -5,13 +5,13 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import Web3 from 'web3';
-import AWS from 'aws-sdk';
-import Twitter from 'twitter';
+const Web3 = require('web3');
+const AWS = require('aws-sdk');
+const Twitter = require('twitter');
 
-import Db from './src/db';
-import Token from './src/token';
-import FaucetService from './src/index';
+const Db = require('./src/db');
+const Token = require('./src/token');
+const FaucetService = require('./src/index');
 
 const simpledb = new AWS.SimpleDB();
 let web3Provider;
