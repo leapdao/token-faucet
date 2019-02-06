@@ -53,7 +53,7 @@ describe('Twitter faucet', () => {
     try {
       await manager.tweetFund('bla-com', 200);
     } catch (err) {
-      expect(err.message).to.contain('Error: url bla-com not valid.');
+      expect(err.message).to.contain('Bad Request: url bla-com not valid.');
     }
   });
 
@@ -62,7 +62,7 @@ describe('Twitter faucet', () => {
     try {
       await manager.tweetFund('https://twitter.com/JohBa/status/abc', 200);
     } catch (err) {
-      expect(err.message).to.contain('Error: could not parse tweet id');
+      expect(err.message).to.contain('Bad Request: could not parse tweet id');
     }
   });
 
@@ -77,7 +77,7 @@ describe('Twitter faucet', () => {
     try {
       await manager.tweetFund('https://twitter.com/JohBa/status/1008271083080994817', 200);
     } catch (err) {
-      expect(err.message).to.contain('Error: could not parse valid ethereum address');
+      expect(err.message).to.contain('Bad Request: could not parse valid ethereum address');
     }
   });
 
@@ -96,7 +96,7 @@ describe('Twitter faucet', () => {
     try {
       await manager.tweetFund('https://twitter.com/JohBa/status/1008271083080994817', 200);
     } catch (err) {
-      expect(err.message).to.contain('Error: not enough time passed since last claim');
+      expect(err.message).to.contain('Bad Request: not enough time passed since last claim');
     }
   });
 
