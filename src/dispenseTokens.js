@@ -39,8 +39,8 @@ exports.handler = async (event) => {
   const inputs = helpers.calcInputs(utxos, senderAddr, totalAmount, 0);
 
   let outputs = helpers.calcOutputs(utxos, inputs, senderAddr, senderAddr, totalAmount, 0);
-  if (outputs.length > 1) {
-    outputs = outputs.splice(-1); // leave only change output
+  if (outputs.length > 1) { // if we have change output
+    outputs = outputs.splice(-1); // leave only change
   }
 
   outputs = outputs.concat(requests.map(r => new Output(amount, r.to, 0)));

@@ -7,7 +7,7 @@
 
 const url = require('url');
 const { isValidAddress } = require('ethereumjs-util');
-const { BadRequest } = require('./errors');
+const { BadRequest } = require('./utils/errors');
 
 const isValidUrl = (string) => {
   try {
