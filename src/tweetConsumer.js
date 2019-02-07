@@ -69,7 +69,7 @@ module.exports = class TweetConsumer {
     const { created } = await this.db.getAddr(address);
     const dayAgo = Date.now() - (24 * 60 * 60 * 1000);
     if (dayAgo < created) {
-      throw new BadRequest(`not enough time passed since last claim ${created}.`);
+      throw new BadRequest(`not enough time passed since the last claim`);
     }
 
     await this.queue.put(address, amount);
