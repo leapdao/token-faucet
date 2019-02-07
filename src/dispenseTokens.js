@@ -6,6 +6,7 @@
  */
 
 const fetch = require('node-fetch');
+const { bi, multiply } = require('jsbi-utils');
 const { Tx, helpers, Output, Outpoint } = require('leap-core');
 
 const rpc = (url, method, params) =>
@@ -20,8 +21,8 @@ exports.handler = async (event) => {
 
   const provider = process.env.PROVIDER_URL;
 
-  const amount = process.env.AMOUNT;
-  const totalAmount = amount * requests.length;
+  const amount = bi(process.env.AMOUNT);
+  const totalAmount = multiply(amount, bi(requests.length));
 
   const senderAddr = process.env.SENDER_ADDR;
   const utxos = (await rpc(provider, "plasma_unspent", [senderAddr]))

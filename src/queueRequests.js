@@ -8,12 +8,12 @@
 const AWS = require('aws-sdk');
 
 const Twitter = require('twitter');
-const Db = require('./db');
-const Queue = require('./queue');
+const Db = require('./utils/db');
+const Queue = require('./utils/queue');
 const TweetConsumer = require('./tweetConsumer');
 
 exports.handler = async (event, context) => {
-  const body = JSON.parse(event.body);
+  const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
 
   const client = new Twitter({
     consumer_key: process.env.TW_CONSUMER_KEY,
@@ -33,5 +33,10 @@ exports.handler = async (event, context) => {
     new Db(process.env.TABLE_NAME)
   );
 
-  return service.tweetFund(body.tweetUrl, parseInt(process.env.AMOUNT, 10));
+  const address = await service.tweetFund(body.tweetUrl, parseInt(process.env.AMOUNT, 10));
+
+  return { 
+    statusCode: 200,
+    body: address
+  };
 };

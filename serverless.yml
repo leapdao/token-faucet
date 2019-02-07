@@ -35,6 +35,45 @@ provider:
           - - "arn:aws:sdb:*:*:domain/"
             - Ref: faucetDb
 
+responseMappings: &response_mappings
+  headers:
+    Content-Type: "'application/json'"
+  statusCodes:
+      200:
+          pattern: ''
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      400:
+          pattern: 'Bad Request: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      401:
+          pattern: 'Unauthorized: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      403:
+          pattern: 'Forbidden: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      404:
+          pattern: 'Not Found: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      500:
+          pattern: 'Error: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+
 functions:
   queueRequests:
     timeout: 3
@@ -53,7 +92,9 @@ functions:
       - http:
           method: post
           path: /
+          integration: lambda
           cors: true
+          response: *response_mappings
   dispenseTokens:
     timeout: 5
     handler: src/dispenseTokens.handler

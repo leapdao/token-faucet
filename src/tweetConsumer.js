@@ -57,20 +57,25 @@ module.exports = class TweetConsumer {
     // parse address
     let address = tweet.text.match(/(?:0x[a-fA-F0-9]{40})/g);
     if (!address || !isValidAddress(address[0])) {
-      // http 400
-      throw new BadRequest(`could not parse valid ethereum address, got '${address}'.`);
+      throw new BadRequest(`Tweet should include valid Ethereum address 🤷‍♂️`);
+    }
+
+    let leapMention = tweet.text.match(/@Leapdao/i);
+    if (!leapMention) {
+      throw new BadRequest(`Tweet should be mentioning @Leapdao 🤷‍♂️`);
     }
     address = address[0];
 
     const { created } = await this.db.getAddr(address);
     const dayAgo = Date.now() - (24 * 60 * 60 * 1000);
-    /*if (dayAgo < created) {
+    if (dayAgo < created) {
       throw new BadRequest(`not enough time passed since last claim ${created}.`);
-    }*/
+    }
 
     await this.queue.put(address, amount);
     await this.db.setAddr(address);
-    return { statusCode: 200, body: address };
+
+    return address;
   }
 
 }
