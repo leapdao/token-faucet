@@ -6,6 +6,7 @@
  */
 
 const url = require('url');
+const { isValidAddress } = require('ethereumjs-util');
 const { BadRequest } = require('./errors');
 
 const isValidUrl = (string) => {
@@ -30,11 +31,10 @@ function getTweet(client, id) {
 
 module.exports = class TweetConsumer {
 
-  constructor(token, twitter, db, web3) {
-    this.token = token;
+  constructor(queue, twitter, db) {
+    this.queue = queue;
     this.twitter = twitter;
     this.db = db;
-    this.web3 = web3;
   }
 
   async tweetFund(tweetUrl, amount) {
@@ -42,32 +42,35 @@ module.exports = class TweetConsumer {
       // http 400
       throw new BadRequest(`url ${tweetUrl} not valid.`);
     }
+    
     // parse url
     const [tweetId] = tweetUrl.match(/(?:[0-9]*)$/g);
     if (tweetId.length < 18) {
       // http 400
       throw new BadRequest(`could not parse tweet id, got '${tweetId}'.`);
     }
+    
     // check tweetId not used before
     // get tweet content
     const tweet = await getTweet(this.twitter, tweetId);
+    
     // parse address
     let address = tweet.text.match(/(?:0x[a-fA-F0-9]{40})/g);
-    if (!address || !this.web3._extend.utils.isAddress(address[0])) {
+    if (!address || !isValidAddress(address[0])) {
       // http 400
       throw new BadRequest(`could not parse valid ethereum address, got '${address}'.`);
     }
     address = address[0];
-    let dbRsp = await this.db.getAddr(address);
-    dbRsp = (dbRsp) || { created: 0 };
+
+    const { created } = await this.db.getAddr(address);
     const dayAgo = Date.now() - (24 * 60 * 60 * 1000);
-    if (dayAgo < dbRsp.created) {
-      // http 400
-      throw new BadRequest(`not enough time passed since last claim ${dbRsp.created}.`);
-    }
-    await this.token.transfer(address, amount);
+    /*if (dayAgo < created) {
+      throw new BadRequest(`not enough time passed since last claim ${created}.`);
+    }*/
+
+    await this.queue.put(address, amount);
     await this.db.setAddr(address);
-    return address;
+    return { statusCode: 200, body: address };
   }
 
 }

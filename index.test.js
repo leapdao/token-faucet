@@ -47,10 +47,11 @@ sinon.stub(web3.eth, 'contract').returns(web3.eth);
 sinon.stub(web3.eth, 'at', address => ({ ...contract, address }));
 sinon.stub(web3._extend.utils, 'isAddress').returns(true);
 
+const db = new Db(sdb)
 
 describe('Twitter faucet', () => {
   it('should throw on invalid url', async () => {
-    const manager = new FaucetSerivce(null, twitter, new Db(sdb), web3);
+    const manager = new FaucetSerivce(null, twitter, db, web3);
     try {
       await manager.tweetFund('bla-com', 200);
     } catch (err) {
@@ -59,7 +60,7 @@ describe('Twitter faucet', () => {
   });
 
   it('should throw on invalid tweet', async () => {
-    const manager = new FaucetSerivce(null, twitter, new Db(sdb), web3);
+    const manager = new FaucetSerivce(null, twitter, db, web3);
     try {
       await manager.tweetFund('https://twitter.com/JohBa/status/abc', 200);
     } catch (err) {
@@ -74,7 +75,7 @@ describe('Twitter faucet', () => {
       id_str: '1008271083080994817',
       text: 'Requesting faucet funds into 0x00 on the #Rinkeby #Ethereum test network.',
     });
-    const manager = new FaucetSerivce(null, twitter, new Db(sdb), web3);
+    const manager = new FaucetSerivce(null, twitter, db, web3);
     try {
       await manager.tweetFund('https://twitter.com/JohBa/status/1008271083080994817', 200);
     } catch (err) {
@@ -90,10 +91,9 @@ describe('Twitter faucet', () => {
       text: 'Requesting faucet funds into 0x8db6B632D743aef641146DC943acb64957155388 on the #Rinkeby #Ethereum test network.',
     });
     const earlier = new Date();
-    sinon.stub(sdb, 'getAttributes').yields(null, {
-      Attributes: [{ Name: 'created', Value: earlier.toString() }],
-    });
-    const manager = new FaucetSerivce(null, twitter, new Db(sdb), web3);
+    sinon.stub(db, 'getAddr').returns({ created: earlier });
+
+    const manager = new FaucetSerivce(null, twitter, db, web3);
     try {
       await manager.tweetFund('https://twitter.com/JohBa/status/1008271083080994817', 200);
     } catch (err) {
@@ -116,7 +116,7 @@ describe('Twitter faucet', () => {
     sinon.stub(sdb, 'getAttributes').yields(null, {});
     sinon.stub(sdb, 'putAttributes').yields(null, {});
     const token = new Token(web3, '0x1255', sqs, 'url', '0x2233');
-    const manager = new FaucetSerivce(token, twitter, new Db(sdb), web3);
+    const manager = new FaucetSerivce(token, twitter, db, web3);
     await manager.tweetFund('https://twitter.com/JohBa/status/1008271083080994817', 200);
     expect(sqs.sendMessage).calledWith({
       MessageBody: '{"from":"0x1255","to":"0x2233","gas":1200,"data":"0x112233"}',
@@ -132,5 +132,6 @@ describe('Twitter faucet', () => {
     if (sqs.sendMessage.restore) sqs.sendMessage.restore();
     if (sdb.getAttributes.restore) sdb.getAttributes.restore();
     if (sdb.putAttributes.restore) sdb.putAttributes.restore();
+    if (db.getAddr.restore) db.getAddr.restore();
   });
 });
