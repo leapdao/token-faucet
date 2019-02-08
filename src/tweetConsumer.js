@@ -49,10 +49,14 @@ module.exports = class TweetConsumer {
       // http 400
       throw new BadRequest(`could not parse tweet id, got '${tweetId}'.`);
     }
+
+    console.log(tweetUrl);
     
     // check tweetId not used before
     // get tweet content
     const tweet = await getTweet(this.twitter, tweetId);
+
+    console.log(tweet.text);
     
     // parse address
     let address = tweet.text.match(/(?:0x[a-fA-F0-9]{40})/g);
