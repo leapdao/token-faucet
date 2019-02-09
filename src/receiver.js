@@ -30,7 +30,8 @@ exports.handler = async (event, context) => {
   const service = new TweetHandler(
     queue,
     client,
-    new Db(process.env.TABLE_NAME)
+    new Db(process.env.TABLE_NAME),
+    Number(process.env.ATTEMPTS_PER_ACCOUNT || 0),
   );
 
   const address = await service.handleTweet(body.tweetUrl);

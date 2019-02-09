@@ -92,6 +92,7 @@ functions:
       QUEUE_NAME: ${self:custom.sqs}
       TABLE_NAME:
         Ref: faucetDb
+      ATTEMPTS_PER_ACCOUNT: ${env:ATTEMPTS_PER_ACCOUNT}
     events:
       - http:
           method: post

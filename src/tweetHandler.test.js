@@ -22,6 +22,9 @@ const validTweetData = {
   id: 1008271083080994800,
   id_str: '1008271083080994817',
   text: validTweet,
+  user: {
+    id_str: '123'
+  }
 };
 
 const validTweetUrl = 'https://twitter.com/JohBa/status/1008271083080994817';
@@ -32,7 +35,9 @@ describe('TweetHandler', () => {
   beforeEach(() => {
     db = {
       setAddr: () => {},
-      getAddr: () => ({}),
+      getAddr: () => ({ created: 0 }),
+      setTwitterAccountRequestAttempts: (acc, count) => { db[acc] = count; },
+      getTwitterAccountRequestAttempts: (acc) => ({ created: db[acc] || 0 }),
     };
     
     queue = {
@@ -44,7 +49,7 @@ describe('TweetHandler', () => {
     };
   });
 
-  const handler = () => new TweetHandler(queue, twitter, db);
+  const handler = () => new TweetHandler(queue, twitter, db, 2);
 
   const withTweet = tweet => {
     twitter.get = (a, b, cb) => cb(null, { ...validTweetData, text: tweet });
@@ -88,7 +93,7 @@ describe('TweetHandler', () => {
     );
   });
 
-  describe('valid tweet', () => {
+  describe('valid tweet - ', () => {
     it('should throw if time too short', async () => {
       withTweet(validTweet);
       db.getAddr = () => ({ created: new Date() });
@@ -100,8 +105,28 @@ describe('TweetHandler', () => {
   
       expect(queue['0x8db6B632D743aef641146DC943acb64957155388']).to.be.undefined;
     });
+
+    it('should throw if already requested from this account', async () => {
+      withTweet(validTweet);
+      const oneTimeHandler = new TweetHandler(queue, twitter, db, 1);
+      await oneTimeHandler.handleTweet(validTweetUrl, 200);
+      await expectThrow(
+        oneTimeHandler.handleTweet(validTweetUrl, 200),
+        'Bad Request: Can request only 1 time per Twitter account'
+      );
+    });
+
+    it('should put address into sending queue if twitter account check is disabled', async () => {
+      withTweet(validTweet);
+      db.getTwitterAccountRequestAttempts = () => ({ created: 1 });
   
-    it('should put address into sending queue if tweet is reused', async () => {
+      const handler = new TweetHandler(queue, twitter, db, 0)
+      await handler.handleTweet(validTweetUrl, 200);
+  
+      expect(queue['0x8db6B632D743aef641146DC943acb64957155388']).to.be.true;
+    });
+
+    it('should put address into sending queue if address is reused', async () => {
       withTweet(validTweet);
       const earlier = new Date();
       earlier.setHours(-25);

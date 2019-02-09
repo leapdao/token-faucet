@@ -22,8 +22,10 @@ https://jw98dxp219.execute-api.eu-west-1.amazonaws.com/testnet
 
 1. Execute deployment:
 ```
-SENDER_ADDR=<faucet-address> PROVIDER_URL=<leap-node-json-rpc-url> PRIV_KEY=<faucet-priv-key> AMOUNT=<amount-to-dispense> sls deploy -s <env>
+SENDER_ADDR=<faucet-address> PROVIDER_URL=<leap-node-json-rpc-url> PRIV_KEY=<faucet-priv-key> AMOUNT=<amount-to-dispense> ATTEMPTS_PER_ACCOUNT=<max-requests-per-twitter-account> sls deploy -s <env>
 ```
+
+Skip `ATTEMPTS_PER_ACCOUNT` or set it to 0 to allow unlimited requests from same twitter account.
 
 2. (First deployment only) Set up `dispenseTokens` lambda to run on new SQS message.
 ⚠️ It is a unsolved issue in serverless config — it should be set up with serverless, but isn't working for some reason.

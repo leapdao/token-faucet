@@ -52,17 +52,33 @@ module.exports = class Db {
   }
 
   setAddr(addr) {
+    this.setAttr(addr, new Date().toString());
+  }
+
+  setTwitterAccountRequestAttempts(account, count) {
+    this.setAttr(account, String(count));
+  }
+
+  setAttr(addr, val) {
     if (!this.sdb) return;
     return this.putAttributes({
       DomainName: this.tableName,
       ItemName: addr,
       Attributes: [
-        { Name: 'created', Value: new Date().toString(), Replace: true },
+        { Name: 'created', Value: val, Replace: true },
       ],
     });
   }
 
   async getAddr(addr) {
+    return this.getAttr(addr).then(a => ({ created: new Date(a.created) }));
+  }
+
+  async getTwitterAccountRequestAttempts(account) {
+    return this.getAttr(account).then(a => ({ created: Number(a.created) }));
+  }
+
+  async getAttr(addr) {
     if (!this.sdb) return { created: 0 };
 
     const data = await this.getAttributes({
@@ -70,13 +86,7 @@ module.exports = class Db {
       ItemName: addr,
     });
 
-    if (!data.Attributes) {
-      return { created: 0 };
-    }
-
-    const rsp = transform(data.Attributes);
-    rsp.created = Date.parse(rsp.created);
-    return rsp;
+    return Object.assign({ created: 0 }, transform(data.Attributes || []));
   }
 
   method(name, params) {

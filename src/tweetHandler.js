@@ -31,10 +31,11 @@ function getTweet(client, id) {
 
 module.exports = class TweetHandler {
 
-  constructor(queue, twitter, db) {
+  constructor(queue, twitter, db, attemptsPerAccount = 0) {
     this.queue = queue;
     this.twitter = twitter;
     this.db = db;
+    this.attemptsPerAccount = attemptsPerAccount;
   }
 
   async handleTweet(tweetUrl) {
@@ -52,7 +53,19 @@ module.exports = class TweetHandler {
     const tweet = await getTweet(this.twitter, tweetId);
 
     console.log('Tweet', tweet.text); // eslint-disable-line no-console
+    console.log('User id', tweet.user.id_str); // eslint-disable-line no-console
     
+    const attempts = (
+      await this.db.getTwitterAccountRequestAttempts(tweet.user.id_str)
+    ).created;
+
+    if (this.attemptsPerAccount && attempts >= this.attemptsPerAccount) {
+      throw new BadRequest(
+        `Can request only ${this.attemptsPerAccount} ` +
+        `time${this.attemptsPerAccount > 1 ? 's' : ''} per Twitter account`
+      );
+    }
+
     let address = tweet.text.match(/(?:0x[a-fA-F0-9]{40})/g);
     if (!address || !isValidAddress(address[0])) {
       throw new BadRequest(`Tweet should include valid Ethereum address`);
@@ -72,6 +85,7 @@ module.exports = class TweetHandler {
 
     await this.queue.put(address);
     await this.db.setAddr(address);
+    await this.db.setTwitterAccountRequestAttempts(tweet.user.id_str, attempts + 1);
 
     return address;
   }
