@@ -9,46 +9,47 @@ const fetch = require('node-fetch');
 const { bi, multiply } = require('jsbi-utils');
 const { Tx, helpers, Output, Outpoint } = require('leap-core');
 
-const rpc = (url, method, params) =>
+const poorManRpc = url => (method, params) =>
   fetch(url, {
     method: 'POST',
     body: JSON.stringify({ jsonrpc: "2.0", id: 2895, method, params }),
     headers: { 'Content-Type': 'application/json' },
   }).then(resp => resp.json()).then(resp => resp.result);
 
-exports.handler = async (event) => {
-  const requests = event.Records.map(r => JSON.parse(r.body));
+module.exports = async (requests, provider, faucetAddr, amount) => {
+  amount = bi(amount);
+  const totalOutputValue = multiply(amount, bi(requests.length));
+  
+  const rpc = poorManRpc(provider);
 
-  const provider = process.env.PROVIDER_URL;
-
-  const amount = bi(process.env.AMOUNT);
-  const totalAmount = multiply(amount, bi(requests.length));
-
-  const senderAddr = process.env.SENDER_ADDR;
-  const utxos = (await rpc(provider, "plasma_unspent", [senderAddr]))
+  // let's create faucet tx
+  
+  // calc inputs
+  const utxos = (await rpc("plasma_unspent", [faucetAddr]))
     .map(u => ({
       output: u.output,
       outpoint: Outpoint.fromRaw(u.outpoint),
     }));
 
-  console.log(utxos);
-
   if (utxos.length === 0) {
     throw new Error("No LEAPs in the faucet");
   }
 
-  const inputs = helpers.calcInputs(utxos, senderAddr, totalAmount, 0);
+  const inputs = helpers.calcInputs(utxos, faucetAddr, totalOutputValue, 0);
 
-  let outputs = helpers.calcOutputs(utxos, inputs, senderAddr, senderAddr, totalAmount, 0);
+  // create change output if needed
+  let outputs = helpers.calcOutputs(utxos, inputs, faucetAddr, faucetAddr, totalOutputValue, 0);
   if (outputs.length > 1) { // if we have change output
     outputs = outputs.splice(-1); // leave only change
   }
 
-  outputs = outputs.concat(requests.map(r => new Output(amount, r.to, 0)));
+  // add output for each faucet request
+  outputs = outputs.concat(requests.map(address => new Output(amount, address, 0)));
   
   const tx = Tx.transfer(inputs, outputs).signAll(process.env.PRIV_KEY);
 
-  console.log(tx.toJSON());
+  console.log(tx.toJSON()); // eslint-disable-line no-console
 
-  console.log(await rpc(provider, "eth_sendRawTransaction", [tx.hex()]));
-};
+  // eslint-disable-next-line no-console
+  console.log(await rpc("eth_sendRawTransaction", [tx.hex()])); 
+}

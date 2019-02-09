@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint --fix *.js src/*.js",
-    "test": "mocha *.test.js",
+    "test": "mocha src/**/*.test.js",
     "start": "serverless offline start -s dev"
   },
   "repository": {
@@ -18,9 +18,7 @@
     "chai": "latest",
     "eslint": "^5.13.0",
     "mocha": "^2.5.3",
-    "serverless-offline": "^4.2.1",
-    "sinon": "^1.17.4",
-    "sinon-chai": "^2.8.0"
+    "serverless-offline": "^4.2.1"
   },
   "dependencies": {
     "ethereumjs-util": "^6.0.0",

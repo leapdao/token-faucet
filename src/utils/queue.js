@@ -12,12 +12,10 @@ module.exports = class Queue {
     this.queueUrl = queueUrl;
   }
 
-  put(to, amount) {
+  put(address) {
     return new Promise((resolve, reject) => {
       this.sqs.sendMessage({
-        MessageBody: JSON.stringify({
-          to, amount
-        }),
+        MessageBody: address,
         QueueUrl: this.queueUrl,
       }, (err, data) => {
         if (err) {

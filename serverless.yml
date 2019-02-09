@@ -7,6 +7,10 @@ custom:
   table: faucet-${opt:stage}
   region: eu-west-1
 
+package:
+  exclude:
+    - src/**/*.test.js
+
 provider:
   name: aws
   region: eu-west-1
@@ -77,7 +81,7 @@ responseMappings: &response_mappings
 functions:
   queueRequests:
     timeout: 3
-    handler: src/queueRequests.handler
+    handler: src/receiver.handler
     name: faucet-${opt:stage}-queueRequests
     environment:
       TW_CONSUMER_KEY: ${ssm:/faucet/TW_CONSUMER_KEY}
@@ -97,7 +101,7 @@ functions:
           response: *response_mappings
   dispenseTokens:
     timeout: 5
-    handler: src/dispenseTokens.handler
+    handler: src/sender.handler
     name: faucet-${opt:stage}-dispenseTokens
     reservedConcurrency: 1
     environment:

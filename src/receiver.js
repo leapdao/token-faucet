@@ -10,7 +10,7 @@ const AWS = require('aws-sdk');
 const Twitter = require('twitter');
 const Db = require('./utils/db');
 const Queue = require('./utils/queue');
-const TweetConsumer = require('./tweetConsumer');
+const TweetHandler = require('./tweetHandler');
 
 exports.handler = async (event, context) => {
   const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
@@ -27,13 +27,13 @@ exports.handler = async (event, context) => {
 
   const queue = new Queue(new AWS.SQS(), queueUrl);
 
-  const service = new TweetConsumer(
+  const service = new TweetHandler(
     queue,
     client,
     new Db(process.env.TABLE_NAME)
   );
 
-  const address = await service.tweetFund(body.tweetUrl, parseInt(process.env.AMOUNT, 10));
+  const address = await service.handleTweet(body.tweetUrl);
 
   return { 
     statusCode: 200,

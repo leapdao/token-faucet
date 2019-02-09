@@ -29,7 +29,7 @@ function getTweet(client, id) {
   });
 }
 
-module.exports = class TweetConsumer {
+module.exports = class TweetHandler {
 
   constructor(queue, twitter, db) {
     this.queue = queue;
@@ -37,36 +37,30 @@ module.exports = class TweetConsumer {
     this.db = db;
   }
 
-  async tweetFund(tweetUrl, amount) {
+  async handleTweet(tweetUrl) {
     if (!isValidUrl(tweetUrl)) {
-      // http 400
       throw new BadRequest(`url ${tweetUrl} not valid.`);
     }
     
-    // parse url
     const [tweetId] = tweetUrl.match(/(?:[0-9]*)$/g);
     if (tweetId.length < 18) {
-      // http 400
       throw new BadRequest(`could not parse tweet id, got '${tweetId}'.`);
     }
 
-    console.log(tweetUrl);
+    console.log('Tweet URL', tweetUrl); // eslint-disable-line no-console
     
-    // check tweetId not used before
-    // get tweet content
     const tweet = await getTweet(this.twitter, tweetId);
 
-    console.log(tweet.text);
+    console.log('Tweet', tweet.text); // eslint-disable-line no-console
     
-    // parse address
     let address = tweet.text.match(/(?:0x[a-fA-F0-9]{40})/g);
     if (!address || !isValidAddress(address[0])) {
-      throw new BadRequest(`Tweet should include valid Ethereum address 🤷‍♂️`);
+      throw new BadRequest(`Tweet should include valid Ethereum address`);
     }
 
     let leapMention = tweet.text.match(/@Leapdao/i);
     if (!leapMention) {
-      throw new BadRequest(`Tweet should be mentioning @Leapdao 🤷‍♂️`);
+      throw new BadRequest(`Tweet should be mentioning @Leapdao`);
     }
     address = address[0];
 
@@ -76,7 +70,7 @@ module.exports = class TweetConsumer {
       throw new BadRequest(`not enough time passed since the last claim`);
     }
 
-    await this.queue.put(address, amount);
+    await this.queue.put(address);
     await this.db.setAddr(address);
 
     return address;
