@@ -16,7 +16,7 @@ const poorManRpc = url => (method, params) =>
     headers: { 'Content-Type': 'application/json' },
   }).then(resp => resp.json()).then(resp => resp.result);
 
-module.exports = async (requests, provider, faucetAddr, amount) => {
+module.exports = async (requests, provider, faucetAddr, privKey, amount) => {
   amount = bi(amount);
   const totalOutputValue = multiply(amount, bi(requests.length));
   
@@ -46,7 +46,7 @@ module.exports = async (requests, provider, faucetAddr, amount) => {
   // add output for each faucet request
   outputs = outputs.concat(requests.map(address => new Output(amount, address, 0)));
   
-  const tx = Tx.transfer(inputs, outputs).signAll(process.env.PRIV_KEY);
+  const tx = Tx.transfer(inputs, outputs).signAll(privKey);
 
   console.log(tx.toJSON()); // eslint-disable-line no-console
 

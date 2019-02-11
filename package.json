@@ -6,7 +6,9 @@
   "scripts": {
     "lint": "eslint --fix *.js src/*.js",
     "test": "mocha src/**/*.test.js",
-    "start": "serverless offline start -s dev"
+    "start": "serverless offline start -s dev",
+    "deploy:testnet": "KMS_KEY_ID=dfa1ee2b-9dd5-45c2-9baa-163ed428d013 PROVIDER_URL=http://node1.testnet.leapdao.org:8645 AMOUNT=1000000000000000000 ATTEMPTS_PER_ACCOUNT=0 sls deploy -s testnet",
+    "deploy:mainnet": "KMS_KEY_ID=54adf377-3ef6-40ce-b32b-3806e3546653 PROVIDER_URL=http://node1.mainnet.leapdao.org:8645 AMOUNT=1000000000000000000 ATTEMPTS_PER_ACCOUNT=1 sls deploy -s mainnet"
   },
   "repository": {
     "type": "git",

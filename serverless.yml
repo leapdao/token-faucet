@@ -6,6 +6,7 @@ custom:
   sqs: faucet-requests-${opt:stage}
   table: faucet-${opt:stage}
   region: eu-west-1
+  kmsKeyArn: arn:aws:kms:eu-west-1:929106972464:key/${env:KMS_KEY_ID}
 
 package:
   exclude:
@@ -16,6 +17,8 @@ provider:
   region: eu-west-1
   runtime: nodejs8.10
   timeout: 30
+  iamManagedPolicies:
+    - arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -38,6 +41,10 @@ provider:
           - ""
           - - "arn:aws:sdb:*:*:domain/"
             - Ref: faucetDb
+    - Effect: Allow
+      Action:
+       - KMS:Decrypt
+      Resource: ${self:custom.kmsKeyArn}
 
 responseMappings: &response_mappings
   headers:
@@ -101,15 +108,14 @@ functions:
           cors: true
           response: *response_mappings
   dispenseTokens:
-    timeout: 5
+    timeout: 7
     handler: src/sender.handler
     name: faucet-${opt:stage}-dispenseTokens
     reservedConcurrency: 1
     environment:
-      SENDER_ADDR: ${env:SENDER_ADDR}
-      PRIV_KEY: ${env:PRIV_KEY}
       AMOUNT: ${env:AMOUNT}
       PROVIDER_URL: ${env:PROVIDER_URL}
+      ENV: ${opt:stage}
     events:
       - sqs: 
           arn:
