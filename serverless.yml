@@ -107,6 +107,22 @@ functions:
           integration: lambda
           cors: true
           response: *response_mappings
+  addressFaucet:
+    timeout: 3
+    handler: src/addressFaucet.handler
+    name: faucet-${opt:stage}-requestForAddress
+    environment:
+      REGION: ${self:custom.region}
+      QUEUE_NAME: ${self:custom.sqs}
+      TABLE_NAME:
+        Ref: faucetDb
+    events:
+      - http:
+          method: post
+          path: /address
+          integration: lambda
+          cors: true
+          response: *response_mappings
   dispenseTokens:
     timeout: 7
     handler: src/sender.handler
