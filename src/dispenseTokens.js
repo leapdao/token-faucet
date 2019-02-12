@@ -23,7 +23,7 @@ module.exports = async (requests, provider, faucetAddr, privKey, amount) => {
   const rpc = poorManRpc(provider);
 
   // let's create faucet tx
-  
+
   // calc inputs
   const utxos = (await rpc("plasma_unspent", [faucetAddr]))
     .map(u => ({
@@ -41,6 +41,8 @@ module.exports = async (requests, provider, faucetAddr, privKey, amount) => {
   let outputs = helpers.calcOutputs(utxos, inputs, faucetAddr, faucetAddr, totalOutputValue, 0);
   if (outputs.length > 1) { // if we have change output
     outputs = outputs.splice(-1); // leave only change
+  } else {
+    outputs = [];
   }
 
   // add output for each faucet request
