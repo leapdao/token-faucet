@@ -42,7 +42,7 @@ Create required properties in [AWS parameter store](https://eu-west-1.console.aw
 ### Private key holding tokens on Plasma:
 
 1. Put your target env in the name (e.g. `/faucet/testnet/PRIV_KEY`)
-2. Encrypt with KMS key aliased as `<env>/faucet` (e.g. `testnet/faucet)
+2. Encrypt with KMS key
 
 ```
 "Name": "/faucet/<env>/PRIV_KEY",
@@ -54,7 +54,7 @@ Create required properties in [AWS parameter store](https://eu-west-1.console.aw
 
 1. Execute deployment:
 ```
-PROVIDER_URL=<leap-node-json-rpc-url> AMOUNT=<amount-to-dispense> ATTEMPTS_PER_ACCOUNT=<max-requests-per-twitter-account> sls deploy -s <env>
+KMS_KEY_ID=<kms-key-id> PROVIDER_URL=<leap-node-json-rpc-url> AMOUNT=<amount-to-dispense> ATTEMPTS_PER_ACCOUNT=<max-requests-per-twitter-account> sls deploy -s <env>
 ```
 
 Skip `ATTEMPTS_PER_ACCOUNT` or set it to 0 to allow unlimited requests from same twitter account.
