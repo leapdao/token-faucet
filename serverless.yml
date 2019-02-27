@@ -1,0 +1,157 @@
+service: leap-faucet
+
+custom:
+  serverless-offline:
+    port: 3001
+  sqs: faucet-requests-${opt:stage}
+  table: faucet-${opt:stage}
+  region: eu-west-1
+  kmsKeyArn: arn:aws:kms:eu-west-1:929106972464:key/${env:KMS_KEY_ID}
+
+package:
+  exclude:
+    - src/**/*.test.js
+
+provider:
+  name: aws
+  region: eu-west-1
+  runtime: nodejs8.10
+  timeout: 30
+  iamManagedPolicies:
+    - arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+       - ssm:GetParameters
+       - ssm:GetParameter
+      Resource: "arn:aws:ssm:*:*:parameter/faucet/${opt:stage}/*"
+    - Effect: Allow
+      Action:
+        - sqs:DeleteMessage
+        - sqs:ReceiveMessage
+        - sqs:SendMessage
+        - sqs:GetQueueAttributes
+      Resource: arn:aws:sqs:*:*:${self:custom.sqs}
+    - Effect: Allow
+      Action:
+       - sdb:GetAttributes
+       - sdb:PutAttributes
+      Resource: 
+        Fn::Join:
+          - ""
+          - - "arn:aws:sdb:*:*:domain/"
+            - Ref: faucetDb
+    - Effect: Allow
+      Action:
+       - KMS:Decrypt
+      Resource: ${self:custom.kmsKeyArn}
+
+responseMappings: &response_mappings
+  headers:
+    Content-Type: "'application/json'"
+  statusCodes:
+      200:
+          pattern: ''
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      400:
+          pattern: 'Bad Request: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      401:
+          pattern: 'Unauthorized: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      403:
+          pattern: 'Forbidden: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      404:
+          pattern: 'Not Found: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      500:
+          pattern: 'Error: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+
+functions:
+  queueRequests:
+    timeout: 3
+    handler: src/receiver.handler
+    name: faucet-${opt:stage}-queueRequests
+    environment:
+      TW_CONSUMER_KEY: ${ssm:/faucet/TW_CONSUMER_KEY}
+      TW_CONSUMER_SECRET: ${ssm:/faucet/TW_CONSUMER_SECRET}
+      TW_ACCESS_TOKEN_KEY: ${ssm:/faucet/TW_ACCESS_TOKEN_KEY}
+      TW_ACCESS_TOKEN_SECRET: ${ssm:/faucet/TW_ACCESS_TOKEN_SECRET}
+      REGION: ${self:custom.region}
+      QUEUE_NAME: ${self:custom.sqs}
+      TABLE_NAME:
+        Ref: faucetDb
+      ATTEMPTS_PER_ACCOUNT: ${env:ATTEMPTS_PER_ACCOUNT}
+    events:
+      - http:
+          method: post
+          path: /
+          integration: lambda
+          cors: true
+          response: *response_mappings
+  addressFaucet:
+    timeout: 3
+    handler: src/addressFaucet.handler
+    name: faucet-${opt:stage}-requestForAddress
+    environment:
+      REGION: ${self:custom.region}
+      QUEUE_NAME: ${self:custom.sqs}
+      TABLE_NAME:
+        Ref: faucetDb
+    events:
+      - http:
+          method: post
+          path: /address
+          integration: lambda
+          cors: true
+          response: *response_mappings
+  dispenseTokens:
+    timeout: 7
+    handler: src/sender.handler
+    name: faucet-${opt:stage}-dispenseTokens
+    reservedConcurrency: 1
+    environment:
+      AMOUNT: ${env:AMOUNT}
+      PROVIDER_URL: ${env:PROVIDER_URL}
+      ENV: ${opt:stage}
+    events:
+      - sqs: 
+          arn:
+            Fn::GetAtt:
+            - faucetRequests
+            - Arn
+
+plugins:
+  - serverless-offline
+
+resources:
+  Resources:
+    faucetRequests:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.sqs}
+        MessageRetentionPeriod: 1209600
+        VisibilityTimeout: 60
+    faucetDb:
+      Type: "AWS::SDB::Domain"
+      Properties:
+        DomainName : ${self:custom.table}
+        Description: "SDB Domain to store metadata"
