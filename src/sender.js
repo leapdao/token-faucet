@@ -4,10 +4,11 @@
  * This source code is licensed under the Mozilla Public License Version 2.0
  * found in the LICENSE file in the root directory of this source tree.
  */
+const AWS = require('aws-sdk');
 const { bufferToHex, privateToAddress, toBuffer } = require('ethereumjs-util');
+
 const dispenseTokens = require('./dispenseTokens');
 
-const AWS = require('aws-sdk');
 const ssm = new AWS.SSM();
 
 const readEncryptedProperty = name => new Promise((resolve, reject) => {
