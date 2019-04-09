@@ -57,7 +57,7 @@ module.exports = class TweetHandler {
     
     const attempts = (
       await this.db.getTwitterAccountRequestAttempts(tweet.user.id_str)
-    ).created;
+    ).created || 0;
 
     if (this.attemptsPerAccount && attempts >= this.attemptsPerAccount) {
       throw new Errors.BadRequest(
