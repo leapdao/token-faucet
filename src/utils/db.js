@@ -5,20 +5,20 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-const { Db } = require('leap-lambda-boilerplate');
+const { SimpleDb } = require('leap-lambda-boilerplate');
 
-module.exports = class FaucetDb extends Db {
+module.exports = class FaucetDb extends SimpleDb {
 
   constructor(tableName) {
     super(tableName);
   }
 
   setAddr(addr) {
-    this.setAttr(addr, new Date().toString());
+    this.setAttr(addr, 'created', new Date().toString());
   }
 
   setTwitterAccountRequestAttempts(account, count) {
-    this.setAttr(account, String(count));
+    this.setAttr(account, 'created', String(count));
   }
 
   async getAddr(addr) {
