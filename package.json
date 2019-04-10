@@ -26,7 +26,7 @@
     "ethereumjs-util": "^6.0.0",
     "jsbi-utils": "^1.0.0",
     "leap-core": "^0.27.1",
-    "leap-lambda-boilerplate": "^1.1.0",
+    "leap-lambda-boilerplate": "^1.2.0",
     "node-fetch": "^2.3.0",
     "twitter": "^1.7.1"
   }

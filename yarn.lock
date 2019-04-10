@@ -1192,10 +1192,10 @@ leap-core@^0.27.1:
     ethereumjs-util "^6.0.0"
     jsbi-utils "^1.0.0"
 
-leap-lambda-boilerplate@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/leap-lambda-boilerplate/-/leap-lambda-boilerplate-1.1.0.tgz#442534c2747cbeaf832ba70940e8cb798e565ef6"
-  integrity sha512-l0IHWcXl/CrTpS+cSMcVw9NI6IFT/4GYHjtbuznUqCCI44X2oE18GtoemMWYyn6YckDiZHwmvMfrVlxjyu2xKA==
+leap-lambda-boilerplate@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/leap-lambda-boilerplate/-/leap-lambda-boilerplate-1.2.0.tgz#e39628fc06c5a7660b1df09a9ab85a6a84810e9f"
+  integrity sha512-l1MqZ4RS1bDANPaQyHDlyQzvPei5Te0wl0ZEpG1MSq7PXonEZAdR8crdkTNoUTRB9K1GG/Dk//PUnuhww/7+bg==
 
 levn@^0.3.0, levn@~0.3.0:
   version "0.3.0"
