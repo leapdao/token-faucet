@@ -9,7 +9,7 @@ const AWS = require('aws-sdk');
 
 const Twitter = require('twitter');
 const Db = require('./utils/db');
-const Queue = require('./utils/queue');
+const { Queue } = require('leap-lambda-boilerplate');
 const TweetHandler = require('./tweetHandler');
 
 exports.handler = async (event, context) => {

@@ -7,7 +7,7 @@
 
 const url = require('url');
 const { isValidAddress } = require('ethereumjs-util');
-const { BadRequest } = require('./utils/errors');
+const { Errors } = require('leap-lambda-boilerplate');
 
 const isValidUrl = (string) => {
   try {
@@ -40,12 +40,12 @@ module.exports = class TweetHandler {
 
   async handleTweet(tweetUrl) {
     if (!isValidUrl(tweetUrl)) {
-      throw new BadRequest(`url ${tweetUrl} not valid.`);
+      throw new Errors.BadRequest(`url ${tweetUrl} not valid.`);
     }
     
     const [tweetId] = tweetUrl.match(/(?:[0-9]*)$/g);
     if (tweetId.length < 18) {
-      throw new BadRequest(`could not parse tweet id, got '${tweetId}'.`);
+      throw new Errors.BadRequest(`could not parse tweet id, got '${tweetId}'.`);
     }
 
     console.log('Tweet URL', tweetUrl); // eslint-disable-line no-console
@@ -57,10 +57,10 @@ module.exports = class TweetHandler {
     
     const attempts = (
       await this.db.getTwitterAccountRequestAttempts(tweet.user.id_str)
-    ).created;
+    ).created || 0;
 
     if (this.attemptsPerAccount && attempts >= this.attemptsPerAccount) {
-      throw new BadRequest(
+      throw new Errors.BadRequest(
         `Can request only ${this.attemptsPerAccount} ` +
         `time${this.attemptsPerAccount > 1 ? 's' : ''} per Twitter account`
       );
@@ -68,19 +68,19 @@ module.exports = class TweetHandler {
 
     let address = tweet.text.match(/(?:0x[a-fA-F0-9]{40})/g);
     if (!address || !isValidAddress(address[0])) {
-      throw new BadRequest(`Tweet should include valid Ethereum address`);
+      throw new Errors.BadRequest(`Tweet should include valid Ethereum address`);
     }
 
     let leapMention = tweet.text.match(/@Leapdao/i);
     if (!leapMention) {
-      throw new BadRequest(`Tweet should be mentioning @Leapdao`);
+      throw new Errors.BadRequest(`Tweet should be mentioning @Leapdao`);
     }
     address = address[0];
 
     const { created } = await this.db.getAddr(address);
     const dayAgo = Date.now() - (24 * 60 * 60 * 1000);
     if (dayAgo < created) {
-      throw new BadRequest(`not enough time passed since the last claim`);
+      throw new Errors.BadRequest(`not enough time passed since the last claim`);
     }
 
     await this.queue.put(address);
