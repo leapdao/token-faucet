@@ -57,14 +57,14 @@ describe('TweetHandler', () => {
 
   it('should throw on invalid url', async () => {
     await expectThrow(
-      handler().handleTweet('bla-com', 200),
+      handler().handleTweet('bla-com', 0),
       'Bad Request: url bla-com not valid.'
     );
   });
 
   it('should throw on invalid tweet URL', async () => {
     await expectThrow(
-      handler().handleTweet('https://twitter.com/JohBa/status/abc', 200),
+      handler().handleTweet('https://twitter.com/JohBa/status/abc', 0),
       'Bad Request: could not parse tweet id'
     );
   });
@@ -72,7 +72,7 @@ describe('TweetHandler', () => {
   it('should throw if no address in tweet', async () => {
     withTweet('Requesting @leapdao tokens');
     await expectThrow(
-      handler().handleTweet(validTweetUrl, 200),
+      handler().handleTweet(validTweetUrl, 0),
       'Bad Request: Tweet should include valid Ethereum address'
     );
   });
@@ -80,7 +80,7 @@ describe('TweetHandler', () => {
   it('should throw on invalid address in tweet', async () => {
     withTweet('Requesting into 0x00 @leapdao');
     await expectThrow(
-      handler().handleTweet(validTweetUrl, 200),
+      handler().handleTweet(validTweetUrl, 0),
       'Bad Request: Tweet should include valid Ethereum address'
     );
   });
@@ -88,7 +88,7 @@ describe('TweetHandler', () => {
   it('should throw if no @leapdao handle in tweet', async () => {
     withTweet('Requesting into 0x8db6B632D743aef641146DC943acb64957155388');
     await expectThrow(
-      handler().handleTweet(validTweetUrl, 200),
+      handler().handleTweet(validTweetUrl, 0),
       'Bad Request: Tweet should be mentioning @Leapdao'
     );
   });
@@ -121,9 +121,8 @@ describe('TweetHandler', () => {
       db.getTwitterAccountRequestAttempts = () => ({ created: 1 });
   
       const handler = new TweetHandler(queue, twitter, db, 0)
-      await handler.handleTweet(validTweetUrl, 200);
-  
-      expect(queue['0x8db6B632D743aef641146DC943acb64957155388']).to.be.true;
+      await handler.handleTweet(validTweetUrl, 0);
+      expect(queue['{"address":"0x8db6B632D743aef641146DC943acb64957155388","color":0}']).to.be.true;
     });
 
     it('should put address into sending queue if address is reused', async () => {
@@ -132,17 +131,17 @@ describe('TweetHandler', () => {
       earlier.setHours(-25);
       db.getAddr = () => ({ created: earlier });
   
-      await handler().handleTweet(validTweetUrl, 200);
+      await handler().handleTweet(validTweetUrl, 0);
   
-      expect(queue['0x8db6B632D743aef641146DC943acb64957155388']).to.be.true;
+      expect(queue['{"address":"0x8db6B632D743aef641146DC943acb64957155388","color":0}']).to.be.true;
     });
 
     it('should put address into sending queue', async () => {
       withTweet(validTweet);
   
-      await handler().handleTweet(validTweetUrl, 200);
+      await handler().handleTweet(validTweetUrl, 0);
   
-      expect(queue['0x8db6B632D743aef641146DC943acb64957155388']).to.be.true;
+      expect(queue['{"address":"0x8db6B632D743aef641146DC943acb64957155388","color":0}']).to.be.true;
     });
 
 

@@ -16,7 +16,7 @@ const poorManRpc = url => (method, params) =>
     headers: { 'Content-Type': 'application/json' },
   }).then(resp => resp.json()).then(resp => resp.result);
 
-module.exports = async (requests, provider, faucetAddr, privKey, amount) => {
+module.exports = async (requests, provider, faucetAddr, privKey, amount, color) => {
   amount = bi(amount);
   const totalOutputValue = multiply(amount, bi(requests.length));
   
@@ -25,20 +25,20 @@ module.exports = async (requests, provider, faucetAddr, privKey, amount) => {
   // let's create faucet tx
 
   // calc inputs
-  const utxos = (await rpc("plasma_unspent", [faucetAddr]))
+  const utxos = (await rpc("plasma_unspent", [faucetAddr, color]))
     .map(u => ({
       output: u.output,
       outpoint: Outpoint.fromRaw(u.outpoint),
     }));
 
   if (utxos.length === 0) {
-    throw new Error("No LEAPs in the faucet");
+    throw new Error(`No tokens of color ${color} in the faucet`);
   }
 
-  const inputs = helpers.calcInputs(utxos, faucetAddr, totalOutputValue, 0);
+  const inputs = helpers.calcInputs(utxos, faucetAddr, totalOutputValue, color);
 
   // create change output if needed
-  let outputs = helpers.calcOutputs(utxos, inputs, faucetAddr, faucetAddr, totalOutputValue, 0);
+  let outputs = helpers.calcOutputs(utxos, inputs, faucetAddr, faucetAddr, totalOutputValue, color);
   if (outputs.length > 1) { // if we have change output
     outputs = outputs.splice(-1); // leave only change
   } else {
@@ -46,7 +46,7 @@ module.exports = async (requests, provider, faucetAddr, privKey, amount) => {
   }
 
   // add output for each faucet request
-  outputs = outputs.concat(requests.map(address => new Output(amount, address, 0)));
+  outputs = outputs.concat(requests.map(address => new Output(amount, address, color)));
   
   const tx = Tx.transfer(inputs, outputs).signAll(privKey);
 

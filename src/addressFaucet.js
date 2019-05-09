@@ -13,6 +13,10 @@ const Db = require('./utils/db');
 exports.handler = async (event, context) => {
   const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
   const address = body.address;
+  let color = body.color;
+  if (!color || isNaN(color)) {
+    color = 0;
+  }
 
   const awsAccountId = context.invokedFunctionArn.split(':')[4];
   const queueUrl = `https://sqs.${process.env.REGION}.amazonaws.com/${awsAccountId}/${process.env.QUEUE_NAME}`;
@@ -30,11 +34,11 @@ exports.handler = async (event, context) => {
     throw new Errors.BadRequest(`not enough time passed since the last claim`);
   }
 
-  await queue.put(address);
+  await queue.put(JSON.stringify({address, color}));
   await db.setAddr(address);
 
   return { 
     statusCode: 200,
-    body: address
+    body: { address, color }
   };
 };
