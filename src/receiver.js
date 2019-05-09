@@ -14,10 +14,7 @@ const TweetHandler = require('./tweetHandler');
 
 exports.handler = async (event, context) => {
   const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
-  let color = body.color;
-  if (!color || isNaN(color)) {
-    color = 0;
-  }
+  const color = parseInt(body.color) || 0;
 
   const client = new Twitter({
     consumer_key: process.env.TW_CONSUMER_KEY,

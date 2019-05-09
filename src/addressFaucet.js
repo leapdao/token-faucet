@@ -13,10 +13,7 @@ const Db = require('./utils/db');
 exports.handler = async (event, context) => {
   const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
   const address = body.address;
-  let color = body.color;
-  if (!color || isNaN(color)) {
-    color = 0;
-  }
+  const color = parseInt(body.color) || 0;
 
   const awsAccountId = context.invokedFunctionArn.split(':')[4];
   const queueUrl = `https://sqs.${process.env.REGION}.amazonaws.com/${awsAccountId}/${process.env.QUEUE_NAME}`;
