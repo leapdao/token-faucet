@@ -1,7 +1,7 @@
-# Token Faucet
+# Leap Network Token Faucet
 
 Reload Duration: **24h / address**  
-Amount Dispensed: **1 LEAP**  
+Amount Dispensed: **1*10^18 <TokenName>**  
 
 Instructions:
 
