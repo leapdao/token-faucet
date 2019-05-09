@@ -73,9 +73,6 @@ KMS_KEY_ID=<kms-key-id> PROVIDER_URL=<leap-node-json-rpc-url> AMOUNT=<amount-to-
 
 Skip `ATTEMPTS_PER_ACCOUNT` or set it to 0 to allow unlimited requests from same twitter account.
 
-2. (First deployment only) Set up `dispenseTokens` lambda to run on new SQS message.
-⚠️ It is a unsolved issue in serverless config — it should be set up with serverless, but isn't working for some reason.
-
 ### Testnet
 
 ```
