@@ -30,6 +30,6 @@ exports.handler = async (event) => {
   const colorList = requests.reduce(groupValuesByColor, {});
 
   await Promise.all(Object.keys(colorList).map(color => 
-     dispenses.push(dispenseTokens(colorList[color], provider, faucetAddr, privKey, amount, parseInt(color)))
+    dispenseTokens(colorList[color], provider, faucetAddr, privKey, amount, parseInt(color))
   ));
 };
