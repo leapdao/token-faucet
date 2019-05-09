@@ -29,9 +29,7 @@ exports.handler = async (event) => {
   // todo, order requests by color here
   const colorList = requests.reduce(groupValuesByColor, {});
 
-  const dispenses = [];
-  Object.keys(colorList).forEach(color => 
+  await Promise.all(Object.keys(colorList).map(color => 
      dispenses.push(dispenseTokens(colorList[color], provider, faucetAddr, privKey, amount, parseInt(color)))
-  );
-  await Promise.all(dispenses);
+  ));
 };
