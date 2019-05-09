@@ -11,8 +11,10 @@ const dispenseTokens = require('./dispenseTokens');
 
 const groupValuesByColor = (values, str) => {
 	const elem = JSON.parse(str);
+	const list = (values[`${elem.color}`] || []);
+	list.push(elem.address);
   return Object.assign({}, values, {
-    [`${elem.color}`]: (values[`${elem.color}`] || new Set()).add(BigInt(elem.address))
+    [`${elem.color}`]: list
   });
 };
 
@@ -22,15 +24,14 @@ exports.handler = async (event) => {
   const privKey = await Properties.readEncrypted(`/faucet/${process.env.ENV}/PRIV_KEY`);
   const faucetAddr = bufferToHex(privateToAddress(toBuffer(privKey)));
 
-  let requests = event.Records.map(r => r.body);
+  const requests = event.Records.map(r => r.body);
 
   // todo, order requests by color here
-  requests = requests.reduce(groupValuesByColor, {});
-  console.log('requests: ', requests);
+  const colorList = requests.reduce(groupValuesByColor, {});
 
-  for (var color in requests) {
-    if (requests.hasOwnProperty(color)) {
-        await dispenseTokens(requests[color], provider, faucetAddr, privKey, amount, parseInt(color));
+  for (var color in colorList) {
+    if (colorList.hasOwnProperty(color)) {
+        await dispenseTokens(colorList[color], provider, faucetAddr, privKey, amount, parseInt(color));
     }
 	}
 
