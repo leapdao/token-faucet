@@ -38,7 +38,10 @@ module.exports = class TweetHandler {
     this.attemptsPerAccount = attemptsPerAccount;
   }
 
-  async handleTweet(tweetUrl) {
+  async handleTweet(tweetUrl, color) {
+    if (isNaN(color)) {
+      throw new Errors.BadRequest(`color ${color} not valid.`);
+    }
     if (!isValidUrl(tweetUrl)) {
       throw new Errors.BadRequest(`url ${tweetUrl} not valid.`);
     }
@@ -83,7 +86,7 @@ module.exports = class TweetHandler {
       throw new Errors.BadRequest(`not enough time passed since the last claim`);
     }
 
-    await this.queue.put(address);
+    await this.queue.put(JSON.stringify({address, color}));
     await this.db.setAddr(address);
     await this.db.setTwitterAccountRequestAttempts(tweet.user.id_str, attempts + 1);
 

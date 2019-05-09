@@ -1,7 +1,7 @@
-# LeapDAO Token Faucet
+# Leap Network Token Faucet
 
 Reload Duration: **24h / address**  
-Amount Dispensed: **1 LEAP**  
+Amount Dispensed: **1*10^18 <TokenName>**  
 
 Instructions:
 
@@ -15,6 +15,20 @@ curl -X POST
     "tweetUrl": "https://twitter.com/JohBa/status/1008271083080994817"
   }'
 https://jw98dxp219.execute-api.eu-west-1.amazonaws.com/testnet
+```
+
+🤫 Secret non-twitter instructions 🤫 :
+
+2. Post your address and token color to the faucet like this:
+
+```
+curl -X POST
+  -H 'Content-Type: application/json' 
+  -d '{
+    "address":"0x8db6B632D743aef641146DC943acb64957155388",
+    "color": 1
+  }'
+https://jw98dxp219.execute-api.eu-west-1.amazonaws.com/testnet/address/
 ```
 
 ## Setup

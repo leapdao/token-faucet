@@ -9,6 +9,15 @@ const { bufferToHex, privateToAddress, toBuffer } = require('ethereumjs-util');
 const { Properties } = require('leap-lambda-boilerplate');
 const dispenseTokens = require('./dispenseTokens');
 
+const groupValuesByColor = (values, str) => {
+	const elem = JSON.parse(str);
+	const list = (values[`${elem.color}`] || []);
+	list.push(elem.address);
+  return Object.assign({}, values, {
+    [`${elem.color}`]: list
+  });
+};
+
 exports.handler = async (event) => {
   const provider = process.env.PROVIDER_URL;
   const amount = process.env.AMOUNT;
@@ -17,5 +26,10 @@ exports.handler = async (event) => {
 
   const requests = event.Records.map(r => r.body);
 
-  await dispenseTokens(requests, provider, faucetAddr, privKey, amount);
+  // todo, order requests by color here
+  const colorList = requests.reduce(groupValuesByColor, {});
+
+  await Promise.all(Object.keys(colorList).map(color => 
+    dispenseTokens(colorList[color], provider, faucetAddr, privKey, amount, parseInt(color))
+  ));
 };
