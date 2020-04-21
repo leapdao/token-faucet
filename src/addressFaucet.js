@@ -10,6 +10,44 @@ const { isValidAddress } = require('ethereumjs-util');
 const { Queue, Errors } = require('leap-lambda-boilerplate');
 const Db = require('./utils/db');
 
+const checkSignature = (nonce, signature) => {
+
+  nonce = "\x19Ethereum Signed Message:\n" + nonce.length + nonce;
+  nonce = util.keccak(nonce);
+  const sig = signature;
+  const {v, r, s} = util.fromRpcSig(sig);
+  const pubKey  = util.ecrecover(util.toBuffer(nonce), v, r, s);
+  const addrBuf = util.pubToAddress(pubKey);
+  const addr    = util.bufferToHex(addrBuf);
+  return addr;
+
+}
+
+const handleEthTurin = (body, db, queue) => {
+  const { created } = await db.getAddr(body.address);
+  const dayAgo = Date.now() - (24 * 60 * 60 * 1000);
+  if (dayAgo < created) {
+    throw new Errors.BadRequest(`not enough time passed since the last claim`);
+  }
+
+  // check signature
+  if (body.address !== checkSignature(body.to, body.sig)) {
+    throw new Errors.BadRequest(`address not signer`);
+  }
+
+  // check ownership of NFT
+  // todo
+
+  await queue.put(JSON.stringify({address, body.color}));
+  // also send balance card
+  await db.setAddr(address);
+
+  return { 
+    statusCode: 200,
+    body: { address, color }
+  };
+}
+
 exports.handler = async (event, context) => {
   const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
   const address = body.address;
@@ -23,6 +61,10 @@ exports.handler = async (event, context) => {
   
   if (!isValidAddress(address)) {
     throw new Errors.BadRequest(`Not a valid Ethereum address: ${address}`);
+  }
+
+  if (color > 0 && body.sig) {
+    return handleEthTurin(address, body.sig, db, queue);
   }
 
   const { created } = await db.getAddr(address);
