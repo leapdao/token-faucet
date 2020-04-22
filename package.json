@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint --fix *.js src/*.js",
-    "test": "mocha src/**/*.test.js",
+    "test": "mocha tests/**/*.js",
     "start": "serverless offline start -s dev",
     "deploy:testnet": "KMS_KEY_ID=dfa1ee2b-9dd5-45c2-9baa-163ed428d013 PROVIDER_URL=https://testnet-node.leapdao.org AMOUNT=1000000000000000000 ATTEMPTS_PER_ACCOUNT=0 sls deploy -s testnet",
     "deploy:staging": "KMS_KEY_ID=dfa1ee2b-9dd5-45c2-9baa-163ed428d013 PROVIDER_URL=https://staging-testnet.leapdao.org/rpc AMOUNT=1000000000000000000 ATTEMPTS_PER_ACCOUNT=0 sls deploy -s staging",
@@ -18,10 +18,12 @@
   "author": "LeapDAO <team@leapdao.org>",
   "license": "MPL-2.0",
   "devDependencies": {
-    "chai": "latest",
+    "chai": "^4.2.0",
     "eslint": "^5.13.0",
-    "mocha": "^2.5.3",
-    "serverless-offline": "^4.2.1"
+    "mocha": "^7.1.1",
+    "serverless-offline": "^4.2.1",
+    "sinon": "^9.0.2",
+    "sinon-chai": "^3.5.0"
   },
   "dependencies": {
     "ethereumjs-util": "^6.0.0",

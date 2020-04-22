@@ -9,8 +9,10 @@ const AWS = require('aws-sdk');
 const { isValidAddress } = require('ethereumjs-util');
 const { Queue, Errors } = require('leap-lambda-boilerplate');
 const Db = require('./utils/db');
+const util = require('ethereumjs-util');
 
-const checkSignature = (nonce, signature) => {
+
+exports.checkSignature = (nonce, signature) => {
 
   nonce = "\x19Ethereum Signed Message:\n" + nonce.length + nonce;
   nonce = util.keccak(nonce);
@@ -23,7 +25,7 @@ const checkSignature = (nonce, signature) => {
 
 }
 
-const handleEthTurin = (body, db, queue) => {
+exports.handleEthTurin = async (body, db, queue) => {
   const { created } = await db.getAddr(body.address);
   const dayAgo = Date.now() - (24 * 60 * 60 * 1000);
   if (dayAgo < created) {
@@ -38,7 +40,7 @@ const handleEthTurin = (body, db, queue) => {
   // check ownership of NFT
   // todo
 
-  await queue.put(JSON.stringify({address, body.color}));
+  await queue.put(JSON.stringify({address, color: body.color}));
   // also send balance card
   await db.setAddr(address);
 
@@ -49,6 +51,8 @@ const handleEthTurin = (body, db, queue) => {
 }
 
 exports.handler = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = true;
+
   const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
   const address = body.address;
   const color = parseInt(body.color) || 0;
