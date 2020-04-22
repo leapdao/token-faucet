@@ -11,6 +11,28 @@ const { Queue, Errors } = require("leap-lambda-boilerplate");
 const Db = require("./utils/db");
 const util = require("ethereumjs-util");
 const Web3 = require("web3");
+const ERC721ABI = [
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "owner",
+        type: "address",
+      },
+    ],
+    name: "balanceOf",
+    outputs: [
+      {
+        name: "balance",
+        type: "uint256",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
+  },
+];
+const votingBalanceCardColor = 49159;
 
 const checkSignature = (nonce, signature) => {
   const web3 = new Web3(
@@ -25,21 +47,38 @@ const checkSignature = (nonce, signature) => {
 
 exports.checkSignature = checkSignature;
 
-exports.handleEthTurin = async (body, web3, db, queue) => {
+const handleEthTurin = async (body, tokenContract, db, queue) => {
   const { created } = await db.getAddr(body.address);
-  const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const dayAgo = Date.now() - 120 * 60 * 60 * 1000; // 5 days
   if (dayAgo < created) {
-    throw new Errors.BadRequest(`not enough time passed since the last claim`);
+    throw new Errors.BadRequest("not enough time passed since the last claim");
   }
 
   // check signature
-  if (body.address !== checkSignature(body.toAddress, body.sig)) {
-    throw new Errors.BadRequest(`address not signer`);
+  const recovered = checkSignature(body.toAddress, body.sig);
+  if (body.address !== recovered) {
+    throw new Errors.BadRequest(
+      `address not signer: ${body.address}, recovered: ${recovered}`
+    );
   }
 
   // todo: check ownership of NFT
+  const count = await tokenContract.balanceOf(body.adddress);
+  if (count !== 0) {
+    throw new Errors.BadRequest(`${body.adddress} not token holder`);
+  }
 
-  await queue.put(JSON.stringify({ address, color: body.color }));
+  if (body.color !== 4) {
+    throw new Errors.BadRequest("wrong voice credit color");
+  }
+
+  await queue.put(
+    JSON.stringify({
+      address,
+      color: body.color,
+      nftColor: votingBalanceCardColor,
+    })
+  );
   // todo: also send balance card
   await db.setAddr(address);
 
@@ -48,6 +87,8 @@ exports.handleEthTurin = async (body, web3, db, queue) => {
     body: { address, color },
   };
 };
+
+exports.handleEthTurin = handleEthTurin;
 
 exports.handler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = true;
@@ -59,16 +100,21 @@ exports.handler = async (event, context) => {
 
   const awsAccountId = context.invokedFunctionArn.split(":")[4];
   const queueUrl = `https://sqs.${process.env.REGION}.amazonaws.com/${awsAccountId}/${process.env.QUEUE_NAME}`;
+  const nftAddr = process.env.NFT_ADDR;
+  const providerUrl = process.env.PROVIDER_URL;
 
   const queue = new Queue(new AWS.SQS(), queueUrl);
   const db = new Db(process.env.TABLE_NAME);
+
+  const web3 = new Web3(providerUrl);
+  const tokenContract = web3.eth.Contract(ERC721ABI, nftAddr);
 
   if (!isValidAddress(address)) {
     throw new Errors.BadRequest(`Not a valid Ethereum address: ${address}`);
   }
 
   if (color > 0 && body.sig) {
-    return handleEthTurin(address, body.sig, db, queue);
+    return handleEthTurin(body, tokenContract, db, queue);
   }
 
   const { created } = await db.getAddr(address);
