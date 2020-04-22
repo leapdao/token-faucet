@@ -12,7 +12,7 @@ const Db = require('./utils/db');
 const util = require('ethereumjs-util');
 
 
-exports.checkSignature = (nonce, signature) => {
+const checkSignature = (nonce, signature) => {
 
   nonce = "\x19Ethereum Signed Message:\n" + nonce.length + nonce;
   nonce = util.keccak(nonce);
@@ -22,10 +22,11 @@ exports.checkSignature = (nonce, signature) => {
   const addrBuf = util.pubToAddress(pubKey);
   const addr    = util.bufferToHex(addrBuf);
   return addr;
-
 }
 
-exports.handleEthTurin = async (body, db, queue) => {
+exports.checkSignature = checkSignature;
+
+exports.handleEthTurin = async (body, web3, db, queue) => {
   const { created } = await db.getAddr(body.address);
   const dayAgo = Date.now() - (24 * 60 * 60 * 1000);
   if (dayAgo < created) {
@@ -33,15 +34,14 @@ exports.handleEthTurin = async (body, db, queue) => {
   }
 
   // check signature
-  if (body.address !== checkSignature(body.to, body.sig)) {
+  if (body.address !== checkSignature(body.toAddress, body.sig)) {
     throw new Errors.BadRequest(`address not signer`);
   }
 
-  // check ownership of NFT
-  // todo
+  // todo: check ownership of NFT
 
   await queue.put(JSON.stringify({address, color: body.color}));
-  // also send balance card
+  // todo: also send balance card
   await db.setAddr(address);
 
   return { 
