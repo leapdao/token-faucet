@@ -17,6 +17,10 @@ const queue = {
   put() {},
 };
 
+const tokenContract = {
+  balanceOf() {},
+};
+
 describe('EthTurin Faucet', () => {
   describe('checkSignature()', () => {
     it('should check signature', () => {
