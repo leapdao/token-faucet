@@ -26,9 +26,9 @@ const checkSignature = (nonce, signature) => {
 
 exports.checkSignature = checkSignature;
 
-exports.handleEthTurin = async (body, web3, db, queue) => {
+const handleEthTurin = async (body, web3, db, queue) => {
   const { created } = await db.getAddr(body.address);
-  const dayAgo = Date.now() - (24 * 60 * 60 * 1000);
+  const dayAgo = Date.now() - (120 * 60 * 60 * 1000);
   if (dayAgo < created) {
     throw new Errors.BadRequest(`not enough time passed since the last claim`);
   }
@@ -49,6 +49,8 @@ exports.handleEthTurin = async (body, web3, db, queue) => {
     body: { address, color }
   };
 }
+
+exports.handleEthTurin = handleEthTurin;
 
 exports.handler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = true;
