@@ -80,6 +80,25 @@ describe("EthTurin Faucet", () => {
       };
       
     });
+
+    it("should block on no token", async () => {
+      const body = {
+        address: "0x8db6B632D743aef641146DC943acb64957155388",
+        color: 4,
+        sig:
+          "0xffd7e226fdefe4de0bf492229b30bb601b8f34fa63efdf2abbca6e1ca71c6dde4b43d7ab5d003babe051a1610caddfa836ebd107fbef9f071189b2b14ec102571c",
+        toAddress: "0x18421Dfc1F4C623F63E91a72f7cCbA756148d213",
+      };
+
+      sinon.stub(tokenContract.tokensOfOwner, 'call').yields(null, new String([]));
+      try {
+        rsp = await handleEthTurin(body, tokenContract, sdb, queue);
+        throw Error('shouldn\'t be here');
+      } catch (e) {
+        chai.expect(e.message).to.equal('Bad Request: 0x8db6B632D743aef641146DC943acb64957155388 not token holder');
+      };
+      
+    });
   });
   afterEach(() => {
     if (sdb.getAddr.restore) sdb.getAddr.restore();
