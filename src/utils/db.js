@@ -22,7 +22,13 @@ module.exports = class FaucetDb extends SimpleDb {
   }
 
   async getAddr(addr) {
-    return this.getAttr(addr).then(a => ({ created: new Date(a.created) }));
+    return this.getAttr(addr).then(a => {
+      if (a) {
+        return ({ created: new Date(a.created) });
+      } else {
+        return ({ created: new Date() });
+      }
+    });
   }
 
   async getTwitterAccountRequestAttempts(account) {

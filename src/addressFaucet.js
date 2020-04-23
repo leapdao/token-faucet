@@ -59,7 +59,7 @@ const balanceOf = (tokenContract, addr) =>
 
 
 const handleEthTurin = async (body, tokenContract, db, queue) => {
-  const { created } = await db.getAddr(body.address);
+  const { created } = await db.getAddr(body.tokenId);
   const dayAgo = Date.now() - 120 * 60 * 60 * 1000; // 5 days
   if (dayAgo < created) {
     throw new Errors.BadRequest("not enough time passed since the last claim");
@@ -96,7 +96,7 @@ const handleEthTurin = async (body, tokenContract, db, queue) => {
     })
   );
   // todo: also send balance card
-  await db.setAddr(body.address);
+  await db.setAddr(body.tokenId);
 
   return {
     statusCode: 200,
