@@ -18,7 +18,9 @@ const queue = {
 };
 
 const tokenContract = {
-  balanceOf() {},
+  balanceOf: {
+    call() {},
+  }
 };
 
 describe("EthTurin Faucet", () => {
@@ -53,7 +55,7 @@ describe("EthTurin Faucet", () => {
 
       sinon.stub(queue, "put").resolves({});
 
-      sinon.stub(tokenContract, 'balanceOf').yields(null, new String('1'));
+      sinon.stub(tokenContract.balanceOf, 'call').yields(null, new String('1'));
 
       rsp = await handleEthTurin(body, tokenContract, sdb, queue);
       chai.expect(rsp.statusCode).to.equal(200);

@@ -23,6 +23,7 @@ exports.handler = async (event) => {
   const amount = process.env.AMOUNT;
   const privKey = await Properties.readEncrypted(`/faucet/${process.env.ENV}/PRIV_KEY`);
   const faucetAddr = bufferToHex(privateToAddress(toBuffer(privKey)));
+  console.log('faucetAddr', faucetAddr);
 
   const requests = event.Records.map(r => r.body);
 

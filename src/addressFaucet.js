@@ -55,7 +55,7 @@ const handleResponse = (fulfill, reject) => (err, value) => {
 
 const balanceOf = (tokenContract, addr) =>
   new Promise((fulfill, reject) =>
-    tokenContract.balanceOf(addr, handleResponse(fulfill, reject)));
+    tokenContract.balanceOf.call(addr, handleResponse(fulfill, reject)));
 
 
 const handleEthTurin = async (body, tokenContract, db, queue) => {
