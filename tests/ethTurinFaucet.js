@@ -25,23 +25,23 @@ describe("EthTurin Faucet", () => {
   describe("checkSignature()", () => {
     it("should check signature", () => {
       const sig =
-        "0xe828e92dc11e85a42704beb90cc34f6a384933f98b082533ec9d609bae6f569547fd5024c75711ae3a09d7eb41013583e9cc1abc0f50c22f57264a75d46630a901";
+        "0xffd7e226fdefe4de0bf492229b30bb601b8f34fa63efdf2abbca6e1ca71c6dde4b43d7ab5d003babe051a1610caddfa836ebd107fbef9f071189b2b14ec102571c";
       const rsp = checkSignature(
-        "0xeDfb8EFBB5a040f38d0B9b3E24c7b366C8DED412",
+        "0x18421Dfc1F4C623F63E91a72f7cCbA756148d213",
         sig
       );
-      chai.expect(rsp).to.equal("0x89AB6D3C799d35f5b17194Ee7F07253856A67949");
+      chai.expect(rsp).to.equal("0x8db6b632d743aef641146dc943acb64957155388");
     });
   });
 
   describe("handleEthTurin()", () => {
     it("should allow happy case", async () => {
       const body = {
-        address: "0x89ab6d3c799d35f5b17194ee7f07253856a67949",
+        address: "0x8db6B632D743aef641146DC943acb64957155388",
         color: 4,
         sig:
-          "0xe828e92dc11e85a42704beb90cc34f6a384933f98b082533ec9d609bae6f569547fd5024c75711ae3a09d7eb41013583e9cc1abc0f50c22f57264a75d46630a901",
-        toAddress: "0xeDfb8EFBB5a040f38d0B9b3E24c7b366C8DED412",
+          "0xffd7e226fdefe4de0bf492229b30bb601b8f34fa63efdf2abbca6e1ca71c6dde4b43d7ab5d003babe051a1610caddfa836ebd107fbef9f071189b2b14ec102571c",
+        toAddress: "0x18421Dfc1F4C623F63E91a72f7cCbA756148d213",
       };
 
       const web3 = null;
@@ -53,7 +53,7 @@ describe("EthTurin Faucet", () => {
 
       sinon.stub(queue, "put").resolves({});
 
-      sinon.stub(tokenContract, 'balanceOf').resolves(new String('1'));
+      sinon.stub(tokenContract, 'balanceOf').yields(null, new String('1'));
 
       rsp = await handleEthTurin(body, tokenContract, sdb, queue);
       chai.expect(rsp.statusCode).to.equal(200);

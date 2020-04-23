@@ -6,6 +6,8 @@ custom:
   sqs: faucet-requests-${opt:stage}
   table: faucet-${opt:stage}
   region: eu-west-1
+  nftAddr: "0xd8dcb0c856b5d0d234e70f9e5f13b6bc165f7de4"
+  providerUrl: "https://cors-anywhere.herokuapp.com/https://rinkeby.infura.io/v3/f039330d8fb747e48a7ce98f51400d65"
   kmsKeyArn: arn:aws:kms:eu-west-1:929106972464:key/${env:KMS_KEY_ID}
 
 package:
@@ -15,7 +17,7 @@ package:
 provider:
   name: aws
   region: eu-west-1
-  runtime: nodejs8.10
+  runtime: nodejs10.x
   timeout: 30
   iamManagedPolicies:
     - arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole
@@ -114,6 +116,8 @@ functions:
     environment:
       REGION: ${self:custom.region}
       QUEUE_NAME: ${self:custom.sqs}
+      NFT_ADDR: ${self:custom.nftAddr}
+      PROVIDER_URL: ${self:custom.providerUrl}
       TABLE_NAME:
         Ref: faucetDb
     events:
