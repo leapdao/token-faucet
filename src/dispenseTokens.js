@@ -7,7 +7,7 @@
 
 const fetch = require('node-fetch');
 const { bi, multiply } = require('jsbi-utils');
-const { Tx, helpers, Output, Outpoint } = require('leap-core');
+const { Tx, helpers, Input, Output, Outpoint } = require('leap-core');
 
 const poorManRpc = url => (method, params) =>
   fetch(url, {
@@ -57,8 +57,8 @@ module.exports = async (requests, provider, faucetAddr, privKey, amount, color) 
     tx = Tx.transfer(inputs, outputs).signAll(privKey);
   } else {
     for (let i = 0; i < requests.length; i++) {
-      inputs.push(utxos[i]);
-      outputs.push(new Output(utxos[i].output.value, requests[i], color, utxos.output.data));
+      inputs.push(new Input(utxos[i].outpoint));
+      outputs.push(new Output(utxos[i].output.value, requests[i], color, utxos[i].output.data));
     }
     tx = Tx.transfer(inputs, outputs).signAll(privKey);
   }
