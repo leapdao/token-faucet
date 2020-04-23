@@ -74,9 +74,9 @@ const handleEthTurin = async (body, tokenContract, db, queue) => {
   }
 
   // todo: check ownership of NFT
-  const count = await balanceOf(tokenContract, body.adddress);
+  const count = await balanceOf(tokenContract, body.address);
   if (parseInt(count) < 1) {
-    throw new Errors.BadRequest(`${body.adddress} not token holder`);
+    throw new Errors.BadRequest(`${body.address} not token holder`);
   }
 
   if (body.color !== 4) {
@@ -122,7 +122,7 @@ exports.handler = async (event, context) => {
   const queue = new Queue(new AWS.SQS(), queueUrl);
   const db = new Db(process.env.TABLE_NAME);
 
-  const web3 = new Web3(providerUrl);
+  const web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
   const tokenContract = web3.eth.contract(ERC721ABI).at(nftAddr);
 
   if (!isValidAddress(address)) {
