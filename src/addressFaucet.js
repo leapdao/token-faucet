@@ -75,8 +75,13 @@ const handleEthTurin = async (body, tokenContract, db, queue) => {
   await queue.put(
     JSON.stringify({
       address: body.address,
-      color: body.color,
-      nftColor: votingBalanceCardColor,
+      color: body.color
+    })
+  );
+  await queue.put(
+    JSON.stringify({
+      address: body.address,
+      nftColor: votingBalanceCardColor
     })
   );
   // todo: also send balance card
