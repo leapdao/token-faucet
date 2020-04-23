@@ -30,8 +30,10 @@ const ERC721ABI = [
     payable: false,
     stateMutability: "view",
     type: "function",
-  },
+  }, {"constant":true,"inputs":[{"name":"owner","type":"address"}],"name":"tokensOfOwner","outputs":[{"name":"","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"}
 ];
+
+
 const votingBalanceCardColor = 49159;
 
 const checkSignature = (voteAddr, signature) => {
@@ -57,9 +59,20 @@ const balanceOf = (tokenContract, addr) =>
   new Promise((fulfill, reject) =>
     tokenContract.balanceOf.call(addr, handleResponse(fulfill, reject)));
 
+const tokensOfOwner = (tokenContract, addr) =>
+  new Promise((fulfill, reject) =>
+    tokenContract.tokensOfOwner.call(addr, handleResponse(fulfill, reject)));
+
 
 const handleEthTurin = async (body, tokenContract, db, queue) => {
-  const { created } = await db.getAddr(body.tokenId);
+
+
+  const tokenCount = await tokensOfOwner(tokenContract, body.address);
+  if (tokenCount.length < 1) {
+    throw new Errors.BadRequest(`${body.address} not token holder`);
+  }
+
+  const { created } = await db.getAddr(tokenCount[0]);
   const dayAgo = Date.now() - 120 * 60 * 60 * 1000; // 5 days
   if (dayAgo < created) {
     throw new Errors.BadRequest("not enough time passed since the last claim");
@@ -71,12 +84,6 @@ const handleEthTurin = async (body, tokenContract, db, queue) => {
     throw new Errors.BadRequest(
       `address not signer: ${body.address}, recovered: ${recovered}`
     );
-  }
-
-  // todo: check ownership of NFT
-  const count = await balanceOf(tokenContract, body.address);
-  if (parseInt(count) < 1) {
-    throw new Errors.BadRequest(`${body.address} not token holder`);
   }
 
   if (body.color !== 4) {
@@ -96,7 +103,7 @@ const handleEthTurin = async (body, tokenContract, db, queue) => {
     })
   );
   // todo: also send balance card
-  await db.setAddr(body.tokenId);
+  await db.setAddr(tokenCount[0]);
 
   return {
     statusCode: 200,

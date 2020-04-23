@@ -18,7 +18,7 @@ const queue = {
 };
 
 const tokenContract = {
-  balanceOf: {
+  tokensOfOwner: {
     call() {},
   }
 };
@@ -41,7 +41,6 @@ describe("EthTurin Faucet", () => {
       const body = {
         address: "0x8db6B632D743aef641146DC943acb64957155388",
         color: 4,
-        tokenId: 123,
         sig:
           "0xffd7e226fdefe4de0bf492229b30bb601b8f34fa63efdf2abbca6e1ca71c6dde4b43d7ab5d003babe051a1610caddfa836ebd107fbef9f071189b2b14ec102571c",
         toAddress: "0x18421Dfc1F4C623F63E91a72f7cCbA756148d213",
@@ -54,7 +53,7 @@ describe("EthTurin Faucet", () => {
 
       sinon.stub(queue, "put").resolves({});
 
-      sinon.stub(tokenContract.balanceOf, 'call').yields(null, new String('1'));
+      sinon.stub(tokenContract.tokensOfOwner, 'call').yields(null, new String(['10']));
 
       rsp = await handleEthTurin(body, tokenContract, sdb, queue);
       chai.expect(rsp.statusCode).to.equal(200);
@@ -64,15 +63,15 @@ describe("EthTurin Faucet", () => {
       const body = {
         address: "0x8db6B632D743aef641146DC943acb64957155388",
         color: 4,
-        tokenId: 123,
         sig:
           "0xffd7e226fdefe4de0bf492229b30bb601b8f34fa63efdf2abbca6e1ca71c6dde4b43d7ab5d003babe051a1610caddfa836ebd107fbef9f071189b2b14ec102571c",
         toAddress: "0x18421Dfc1F4C623F63E91a72f7cCbA756148d213",
       };
 
+      sinon.stub(tokenContract.tokensOfOwner, 'call').yields(null, new String(['10']));
       sinon
         .stub(sdb, "getAddr")
-        .resolves({ created: new Date() });
+        .resolves({ created: Date.now()});
       try {
         rsp = await handleEthTurin(body, tokenContract, sdb, queue);
         throw Error('shouldn\'t be here');
@@ -86,6 +85,6 @@ describe("EthTurin Faucet", () => {
     if (sdb.getAddr.restore) sdb.getAddr.restore();
     if (sdb.setAddr.restore) sdb.setAddr.restore();
     if (queue.put.restore) queue.put.restore();
-    if (tokenContract.balanceOf.call.restore) tokenContract.balanceOf.call.restore();
+    if (tokenContract.tokensOfOwner.call.restore) tokenContract.tokensOfOwner.call.restore();
   });
 });
