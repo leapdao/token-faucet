@@ -56,7 +56,7 @@ const handleEthTurin = async (body, tokenContract, db, queue) => {
 
   // check signature
   const recovered = checkSignature(body.toAddress, body.sig);
-  if (body.address !== recovered) {
+  if (util.toChecksumAddress(body.address) !== util.toChecksumAddress(recovered)) {
     throw new Errors.BadRequest(
       `address not signer: ${body.address}, recovered: ${recovered}`
     );
@@ -64,7 +64,7 @@ const handleEthTurin = async (body, tokenContract, db, queue) => {
 
   // todo: check ownership of NFT
   const count = await tokenContract.balanceOf(body.adddress);
-  if (count !== 0) {
+  if (parseInt(count) < 1) {
     throw new Errors.BadRequest(`${body.adddress} not token holder`);
   }
 
@@ -74,17 +74,17 @@ const handleEthTurin = async (body, tokenContract, db, queue) => {
 
   await queue.put(
     JSON.stringify({
-      address,
+      address: body.address,
       color: body.color,
       nftColor: votingBalanceCardColor,
     })
   );
   // todo: also send balance card
-  await db.setAddr(address);
+  await db.setAddr(body.address);
 
   return {
     statusCode: 200,
-    body: { address, color },
+    body: { address: body.address, color: body.color },
   };
 };
 

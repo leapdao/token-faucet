@@ -17,6 +17,10 @@ const queue = {
   put() {},
 };
 
+const tokenContract = {
+  balanceOf() {},
+};
+
 describe("EthTurin Faucet", () => {
   describe("checkSignature()", () => {
     it("should check signature", () => {
@@ -44,13 +48,15 @@ describe("EthTurin Faucet", () => {
 
       sinon
         .stub(sdb, "getAddr")
-        .resolves({ created: Date.now() - 25 * 60 * 60 * 1000 });
-      sinon.stub(sdb, "setAddr").yields(null, {});
+        .resolves({ created: Date.now() - 121 * 60 * 60 * 1000 });
+      sinon.stub(sdb, "setAddr").resolves({});
 
-      sinon.stub(queue, "put").yields(null, {});
+      sinon.stub(queue, "put").resolves({});
 
-      rsp = await handleEthTurin(body, web3, sdb, queue);
-      console.log(rsp);
+      sinon.stub(tokenContract, 'balanceOf').resolves(new String('1'));
+
+      rsp = await handleEthTurin(body, tokenContract, sdb, queue);
+      chai.expect(rsp.statusCode).to.equal(200);
     });
   });
 });
