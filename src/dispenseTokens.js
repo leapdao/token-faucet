@@ -58,7 +58,7 @@ module.exports = async (requests, provider, faucetAddr, privKey, amount, color) 
   } else {
     for (let i = 0; i < requests.length; i++) {
       inputs.push(utxos[i]);
-      outputs.push(new Output(utxos[i].output.value, faucetAddr, color, utxos.output.data));
+      outputs.push(new Output(utxos[i].output.value, requests[i], color, utxos.output.data));
     }
     tx = Tx.transfer(inputs, outputs).signAll(privKey);
   }
