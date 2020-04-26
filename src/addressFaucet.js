@@ -72,7 +72,7 @@ const handleEthTurin = async (body, tokenContract, db, queue) => {
     throw new Errors.BadRequest(`${body.address} not token holder`);
   }
 
-  const { created } = await db.getAddr(`${tokenCount[0]}`);
+  const { created } = await db.getAddr(`tokenId-${tokenCount[0]}`);
   const dayAgo = Date.now() - 120 * 60 * 60 * 1000; // 5 days
   if (dayAgo < created) {
     throw new Errors.BadRequest("not enough time passed since the last claim");
@@ -103,7 +103,7 @@ const handleEthTurin = async (body, tokenContract, db, queue) => {
     })
   );
   // todo: also send balance card
-  await db.setAddr(`${tokenCount[0]}`);
+  await db.setAddr(`tokenId-${tokenCount[0]}`);
 
   return {
     statusCode: 200,
@@ -137,7 +137,7 @@ exports.handler = async (event, context) => {
   }
 
   if (color > 0 && body.sig) {
-    return handleEthTurin(body, tokenContract, db, queue);
+    return await handleEthTurin(body, tokenContract, db, queue);
   }
 
   const { created } = await db.getAddr(address);
