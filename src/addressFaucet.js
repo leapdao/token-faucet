@@ -71,7 +71,7 @@ const handleEthTurin = async (body, tokenContract, db, queue) => {
   if (tokenCount.length < 1) {
     throw new Errors.BadRequest(`${body.address} not token holder`);
   }
-
+  console.log(`token ${tokenCount[0]} has requested to ${body.toAddress}`);
   const { created } = await db.getAddr(`tokenId-${tokenCount[0]}`);
   const dayAgo = Date.now() - 120 * 60 * 60 * 1000; // 5 days
   if (dayAgo < created) {
